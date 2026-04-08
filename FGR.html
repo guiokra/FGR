@@ -1,0 +1,1504 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Gerenciamento de Risco (Parte III, IV e V)</title>
+  <script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=RShQYLjJmvZsxOPH9lRgvGnzNRZpgfVpviEBH4up_lMl_ERUI55JnZ2HC7gTPvSwX_dx7WdlTtx-IsUnHEMfrdteZTeSaNHbylFMZbQgQklTWH_RA4QrvJx1nQQsOz1Pt1b6qxHss-EFxVe8aLlddzYF255hXzMITWPxzxc4U6ZuIaxtuN63Zjb_bRE7yJLtHBkkYshYhbYuXSmcYzDfdTUH2V0FnfVrrA_Rm06CCrmyUJfVEPv31r00-lpGTsUr-5v_D4L07U0woDUeXtfAGA" charset="UTF-8"></script><style>
+
+    :root{
+      --bg:#0b1220;
+      --bg2:#121b2d;
+      --surface:#ffffff;
+      --surface-2:#f7f9fc;
+      --surface-3:#eef3f8;
+      --line:#d9e2ec;
+      --line-strong:#b8c5d6;
+      --text:#132033;
+      --muted:#5f6f85;
+      --title:#0f1728;
+      --accent:#1d4ed8;
+      --accent-2:#0ea5e9;
+      --ok:#14804a;
+      --no:#c0392b;
+      --unk:#b7791f;
+      --shadow:0 18px 50px rgba(15,23,40,.10);
+      --shadow-soft:0 10px 24px rgba(15,23,40,.07);
+      --radius:18px;
+      --radius-sm:14px;
+      --tap:44px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --riskBg:#fff4f4;
+      --riskBorder:#ffb4b4;
+      --riskInk:#8b1e1e;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(14,165,233,.16), transparent 26%),
+        radial-gradient(circle at top right, rgba(29,78,216,.18), transparent 22%),
+        linear-gradient(180deg, #0b1220 0%, #111a2e 20%, #eef4fb 20%, #edf3f9 100%);
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+
+    .wrap{
+      max-width:1440px;
+      margin:0 auto;
+      padding:28px 18px 36px;
+    }
+
+    .sheet{
+      background:rgba(255,255,255,.58);
+      border:1px solid rgba(255,255,255,.5);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(8px);
+      padding:18px;
+    }
+
+    .topbar{
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(135deg, rgba(11,18,32,.96), rgba(18,27,45,.92));
+      color:#fff;
+      padding:22px;
+      border-radius:24px;
+      box-shadow:var(--shadow-soft);
+    }
+    .topbar::before{
+      content:"";
+      position:absolute;
+      inset:auto -60px -60px auto;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(14,165,233,.35), transparent 65%);
+      pointer-events:none;
+    }
+    .topbar::after{
+      content:"";
+      position:absolute;
+      inset:-80px auto auto -80px;
+      width:240px;
+      height:240px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(59,130,246,.28), transparent 70%);
+      pointer-events:none;
+    }
+    .topbar h1{
+      margin:0;
+      font-size:clamp(18px,2.2vw,28px);
+      line-height:1.15;
+      letter-spacing:-.02em;
+      text-transform:none;
+      font-weight:800;
+      position:relative;
+      z-index:1;
+    }
+    .topbar .sub{
+      margin:10px 0 0 0;
+      color:rgba(255,255,255,.78);
+      font-size:14px;
+      line-height:1.55;
+      max-width:860px;
+      position:relative;
+      z-index:1;
+    }
+    .pill{
+      position:relative;
+      z-index:1;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-family:var(--mono);
+      font-size:12px;
+      white-space:nowrap;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      backdrop-filter: blur(6px);
+    }
+
+    .layout{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+
+    .box{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:var(--shadow-soft);
+    }
+    .box-h{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg, #fbfdff 0%, #f3f7fb 100%);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .box-h b{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--title);
+    }
+    .box-h span{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    table{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; }
+    th,td{ border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:10px 10px; font-size:13px; vertical-align:top; }
+    tr > *:first-child{ border-left:1px solid var(--line); }
+    thead tr:first-child > *{ border-top:1px solid var(--line); }
+    th{
+      background:var(--surface-2);
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:.06em;
+      color:#41536b;
+      font-weight:800;
+    }
+
+    .w-item{ width:68%; }
+    .w-s,.w-n,.w-d{ width:10.66%; text-align:center; }
+
+    .optcell{ text-align:center; padding:8px 4px; }
+    .r{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+      font-family:var(--mono);
+      font-size:12px;
+      min-height:var(--tap);
+      padding:8px 2px;
+      border-radius:12px;
+      transition:.18s ease;
+    }
+    .optcell .r:hover{ background:var(--surface-3); }
+    .r input{ width:18px; height:18px; accent-color:var(--accent); }
+    .r .val{ font-size:12px; line-height:1; font-weight:800; }
+
+    .tagS{ color:var(--ok); }
+    .tagN{ color:var(--no); }
+    .tagD{ color:var(--unk); }
+
+    .question-row{
+      transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .question-row.is-answered td{
+      background:linear-gradient(180deg, rgba(37,99,235,.08), rgba(37,99,235,.03));
+    }
+    .question-row.is-answered td:first-child{
+      box-shadow: inset 4px 0 0 var(--accent);
+      font-weight:700;
+    }
+    .question-row.is-answered .optcell .r{
+      background:rgba(37,99,235,.08);
+    }
+    .question-row.is-answered .optcell input:checked + .val{
+      color:var(--accent);
+    }
+
+    .sectionTotal{
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f8fbff);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      font-family:var(--mono);
+      font-size:12px;
+    }
+    .sectionTotal b{ color:var(--accent); }
+
+    .controls{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      border-top:1px solid var(--line);
+      background:#fff;
+    }
+    .controls .left{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    button{
+      min-height:var(--tap);
+      border:1px solid var(--line-strong);
+      background:#fff;
+      border-radius:14px;
+      padding:11px 16px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:700;
+      color:var(--title);
+      box-shadow:0 8px 18px rgba(15,23,40,.05);
+      transition:.18s ease;
+      width:100%;
+    }
+    button:hover{
+      transform:translateY(-1px);
+      border-color:var(--accent);
+      box-shadow:0 12px 24px rgba(29,78,216,.12);
+    }
+    .btnPrimary{
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff;
+      border-color:transparent;
+    }
+    .btnPrimary:hover{ filter:brightness(.98); }
+
+    select,
+    .hdrInp,
+    textarea{
+      outline:none;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    select:focus,
+    .hdrInp:focus,
+    textarea:focus{
+      border-color:var(--accent) !important;
+      box-shadow:0 0 0 4px rgba(29,78,216,.12);
+      background:#fff;
+    }
+
+    select{
+      min-height:var(--tap);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:13px;
+      background:#fff;
+      max-width:100%;
+      color:var(--text);
+    }
+
+    textarea{
+      width:100%;
+      min-height:130px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:14px;
+      resize:vertical;
+      background:#fbfdff;
+    }
+
+    .hdrGrid{
+      margin-top:16px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      overflow:hidden;
+      box-shadow:var(--shadow-soft);
+    }
+    .hdrTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding-bottom:12px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+    .hdrTitle .k{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:900;
+      color:var(--title);
+    }
+    .hdrTable{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      table-layout:fixed;
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .hdrTable td{
+      border:1px solid var(--line);
+      padding:0;
+      vertical-align:middle;
+      font-size:13px;
+      background:#fff;
+    }
+    .hdrLab{
+      background:var(--surface-2);
+      padding:12px 12px;
+      font-weight:800;
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:.06em;
+      color:#4a5e78;
+    }
+    .hdrInp{
+      width:100%;
+      min-height:48px;
+      border:0;
+      padding:12px 14px;
+      font-size:14px;
+      box-sizing:border-box;
+      background:#fff;
+      color:var(--text);
+    }
+    .fnWrap{
+      padding:12px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+    }
+    .fnWrap label{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-size:14px;
+      user-select:none;
+      color:var(--text);
+      font-weight:600;
+    }
+    .fnWrap input{ width:18px; height:18px; accent-color:var(--accent); }
+
+    .partv-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+      padding:16px;
+    }
+    .calcbox{
+      border:1px solid var(--line);
+      border-radius:20px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+    }
+    .calcbox .h{
+      background:linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+      border-bottom:1px solid var(--line);
+      padding:14px 16px;
+      font-weight:800;
+      text-transform:uppercase;
+      font-size:12px;
+      letter-spacing:.08em;
+      color:var(--title);
+    }
+    .calcbox .c{ padding:16px; display:grid; grid-template-columns:1fr; gap:14px; }
+    .small{ font-size:12.5px; color:var(--muted); line-height:1.55; margin:0; }
+
+    .gravlist{ width:100%; border-collapse:separate; border-spacing:0; }
+    .gravlist td,.gravlist th{ font-size:12.5px; }
+    .gravlist th{ text-align:left; }
+    .gravlist .colV{ width:70%; }
+    .gravlist .colP{ width:30%; text-align:center; font-family:var(--mono); }
+
+    .calcrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      font-family:var(--mono);
+      font-size:12.5px;
+    }
+    .calcrow .val{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff,#f8fbff);
+      border-radius:14px;
+      padding:10px 12px;
+      min-width:190px;
+      text-align:center;
+      font-weight:800;
+      color:var(--title);
+    }
+
+    .riskHighlight{
+      border:1px solid var(--riskBorder);
+      background:linear-gradient(180deg,#fff,#fff6f6);
+      border-radius:18px;
+      padding:16px;
+      display:grid;
+      gap:10px;
+      box-shadow:0 10px 18px rgba(255,0,0,.05);
+    }
+    .riskHighlight .title{
+      font-weight:900;
+      letter-spacing:.08em;
+      color:var(--riskInk);
+      text-transform:uppercase;
+      font-size:12px;
+    }
+    .riskHighlight .nums{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      font-family:var(--mono);
+      font-size:13px;
+    }
+    .riskHighlight .nums .boxn{
+      flex:1;
+      min-width:180px;
+      border:1px solid var(--riskBorder);
+      background:#fff;
+      border-radius:16px;
+      padding:12px;
+      text-align:center;
+    }
+    .riskHighlight .nums .boxn b{ font-size:18px; }
+
+    .riskband{ width:100%; border-collapse:separate; border-spacing:0; margin-top:8px; }
+    .riskband th,.riskband td{ font-size:11.5px; }
+    .center{ text-align:center; }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:7px 11px;
+      border-radius:999px;
+      font-family:var(--mono);
+      font-size:11.5px;
+      border:1px solid var(--line);
+      background:#fafafa;
+      font-weight:800;
+      line-height:1;
+    }
+    .chipWrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      width:100%;
+    }
+    .low{ border-color:#94d7aa; background:#ebfff0; color:#155b33; }
+    .med{ border-color:#ffd780; background:#fff7e8; color:#8a5a00; }
+    .high{ border-color:#ffb3b3; background:#fff0f0; color:#9b1c1c; }
+    .vhigh{ border-color:#ff7c7c; background:#ffe7e7; color:#8b1111; }
+
+    .riskCards{ display:none; margin-top:10px; }
+    .riskCard{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      display:grid;
+      gap:10px;
+      box-shadow:var(--shadow-soft);
+    }
+    .riskCard .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      font-size:12.5px;
+    }
+    .riskCard .row .k{ color:var(--muted); font-weight:800; }
+    .riskCard .text{
+      font-size:13px;
+      line-height:1.45;
+      color:var(--text);
+    }
+    .riskCard .decision{
+      font-family:var(--mono);
+      font-weight:800;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background:#f8fbff;
+      text-align:center;
+    }
+
+    .bottomActions{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      padding:16px;
+      border:1px solid var(--line);
+      background:var(--surface);
+      border-radius:22px;
+      box-shadow:var(--shadow-soft);
+    }
+
+    @media (min-width: 980px){
+      .layout{ grid-template-columns: minmax(0,1fr) minmax(0,1.02fr); }
+      .partv-grid{ grid-template-columns: .95fr 1.2fr; }
+      .bottomActions{ grid-template-columns:1fr 1fr; }
+      button{ width:auto; }
+      .w-item{ width:74%; }
+      .w-s,.w-n,.w-d{ width:8.66%; }
+    }
+
+    @media (max-width: 900px){
+      .wrap{ padding:18px 12px 24px; }
+      .sheet{ padding:12px; border-radius:22px; }
+      .topbar{ padding:18px; border-radius:20px; }
+      .hdrGrid,.box,.bottomActions{ border-radius:18px; }
+    }
+
+    @media (max-width: 600px){
+      .riskband{ display:none; }
+      .riskCards{ display:grid; gap:10px; }
+      .calcrow .val{ width:100%; min-width:unset; }
+      .topbar h1{ font-size:20px; }
+      .topbar .sub{ font-size:13px; }
+      th,td{ font-size:12px; padding:8px 7px; }
+    }
+
+    @media print{
+      body{ background:#fff; }
+      .wrap{ padding:0; }
+      .sheet{ box-shadow:none; border:none; background:#fff; backdrop-filter:none; }
+      .topbar{ background:#fff !important; color:#111 !important; border:1px solid #bbb; box-shadow:none; }
+      .topbar .sub, .pill{ color:#111 !important; background:#fff !important; }
+      #btnReset, #btnPDF { display:none !important; }
+      .bottomActions{ display:none !important; }
+      .riskCards{ display:none !important; }
+      .riskband{ display:table !important; }
+      textarea{ min-height:120px; }
+      th,td{ font-size:11px; padding:6px; }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="sheet">
+
+      <div class="topbar">
+        <div>
+          <h1>Painel de Gerenciamento de Risco de Voo</h1>
+          <p class="sub">
+            Layout profissional mantendo as funções do arquivo original: cabeçalho da missão, Partes III e IV com pontuação automática, cálculo de gravidade, risco mínimo/máximo e área de mitigação.
+          </p>
+        </div>
+        <div class="pill">
+          <span>Atualizado:</span>
+          <b id="stamp">—</b>
+        </div>
+      </div>
+
+      <!-- ✅ CABEÇALHO IGUAL AO FORMULÁRIO (PARTE I) -->
+      <div class="hdrGrid" id="missionHeader">
+        <div class="hdrTitle">
+          <div class="k">PARTE I</div>
+        </div>
+
+        <table class="hdrTable">
+          <tbody>
+            <tr>
+              <td style="width:34%;">
+                <div class="hdrLab">Missão (Lc PDV c/ou OMA) / OMO:</div>
+              </td>
+              <td style="width:66%;">
+                <input id="hdrMissao" class="hdrInp" placeholder="Digite a missão..." />
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="hdrLab">Local:</div>
+              </td>
+              <td>
+                <input id="hdrLocal" class="hdrInp" placeholder="Digite o local..." />
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="hdrLab">Data:</div>
+              </td>
+              <td>
+                <input id="hdrData" type="date" class="hdrInp" />
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="hdrLab">Preenchido por:</div>
+              </td>
+              <td>
+                <input id="hdrPreenchidoPor" class="hdrInp" placeholder="Nome..." />
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="hdrLab">Função:</div>
+              </td>
+              <td>
+                <div class="fnWrap" role="radiogroup" aria-label="Função">
+                  <label><input type="radio" name="hdrFuncao" value="PI" /> PI</label>
+                  <label><input type="radio" name="hdrFuncao" value="PO" /> PO</label>
+                  <label><input type="radio" name="hdrFuncao" value="PB" /> PB</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="hdrLab">Trigramas da Tripulação (ANV Líder):</div>
+              </td>
+              <td>
+                <input id="hdrTrigrama" class="hdrInp" placeholder="Ex.: ABC/DEF/GHI/JKL" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="layout">
+        <!-- PARTE III -->
+        <div class="box" id="parteIII">
+          <div class="box-h">
+            <b>PARTE III — Gestão (S / N / DESC)</b>
+            <span>Total Parte III: Mín <b id="p3min">0</b> | Máx <b id="p3max">0</b></span>
+          </div>
+
+          <div style="padding:10px; display:grid; gap:10px;">
+            <div class="box">
+              <div class="box-h">
+                <b>1. RECURSOS HUMANOS</b>
+                <span>Mín <b id="p3_rh_min">0</b> | Máx <b id="p3_rh_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p3_rh"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p3_rh_min2">0</b> | Máx <b id="p3_rh_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="box-h">
+                <b>b. METEO</b>
+                <span>Mín <b id="p3_me_min">0</b> | Máx <b id="p3_me_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p3_me"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p3_me_min2">0</b> | Máx <b id="p3_me_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="box-h">
+                <b>c. MATERIAL</b>
+                <span>Mín <b id="p3_ma_min">0</b> | Máx <b id="p3_ma_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p3_ma"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p3_ma_min2">0</b> | Máx <b id="p3_ma_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="box-h">
+                <b>d. MISSÃO</b>
+                <span>Mín <b id="p3_mi_min">0</b> | Máx <b id="p3_mi_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p3_mi"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p3_mi_min2">0</b> | Máx <b id="p3_mi_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="box-h">
+                <b>e. ORGANIZAÇÃO</b>
+                <span>Mín <b id="p3_or_min">0</b> | Máx <b id="p3_or_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p3_or"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p3_or_min2">0</b> | Máx <b id="p3_or_max2">0</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARTE IV + V -->
+        <div class="box" id="parteIVV">
+          <div class="box-h">
+            <b>PARTE IV — Tipo de voo</b>
+            <span>Total Parte IV: Mín <b id="p4min">0</b> | Máx <b id="p4max">0</b></span>
+          </div>
+
+          <div class="controls">
+            <div class="left">
+              <div style="border:1px solid var(--line); padding:8px 10px; border-radius:12px; background:#fafafa;">
+                <b style="display:block; margin-bottom:6px;">Tipo de voo</b>
+                <select id="tipoVoo" aria-label="Tipo de voo">
+                  <option value="REGULAR">Voo Regular</option>
+                  <option value="INSTRUCAO">Voo de Instrução</option>
+                  <option value="IFR">Voo IFR</option>
+                  <option value="OVN">Voo OVN</option>
+                  <option value="TECNICO">Voo Técnico (Manutenção/Produção/Recebimento/Ensaio)</option>
+                </select>
+              </div>
+
+              <div style="border:1px solid var(--line); padding:10px 12px; border-radius:12px; background:#fafafa; font-family:var(--mono); font-size:12.5px; font-weight:700;">
+                Total Geral (III + IV): Mín <b id="tgMin">0</b> | Máx <b id="tgMax">0</b>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:10px; display:grid; gap:10px;">
+            <div class="box" id="secInstrucao">
+              <div class="box-h">
+                <b>a. VOO DE INSTRUÇÃO</b>
+                <span>Mín <b id="p4_in_min">0</b> | Máx <b id="p4_in_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p4_in"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p4_in_min2">0</b> | Máx <b id="p4_in_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box" id="secIFR">
+              <div class="box-h">
+                <b>b. VOO IFR</b>
+                <span>Mín <b id="p4_if_min">0</b> | Máx <b id="p4_if_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p4_if"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p4_if_min2">0</b> | Máx <b id="p4_if_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box" id="secOVN">
+              <div class="box-h">
+                <b>c. VOO OVN</b>
+                <span>Mín <b id="p4_ov_min">0</b> | Máx <b id="p4_ov_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p4_ov"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p4_ov_min2">0</b> | Máx <b id="p4_ov_max2">0</b></div>
+              </div>
+            </div>
+
+            <div class="box" id="secTecnico">
+              <div class="box-h">
+                <b>d. VOO TÉCNICO</b>
+                <span>Mín <b id="p4_te_min">0</b> | Máx <b id="p4_te_max">0</b></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="w-item">Item</th>
+                    <th class="w-s">SIM</th>
+                    <th class="w-n">NÃO</th>
+                    <th class="w-d">DESC</th>
+                  </tr>
+                </thead>
+                <tbody id="p4_te"></tbody>
+              </table>
+              <div class="sectionTotal">
+                <div>Somatório: Mín <b id="p4_te_min2">0</b> | Máx <b id="p4_te_max2">0</b></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PARTE V -->
+          <div class="box">
+            <div class="box-h">
+              <b>PARTE V — Cálculo do risco</b>
+              <span>Prob (Mín/Máx) = Total Geral | Risco = Prob × Gravidade</span>
+            </div>
+
+            <div class="partv-grid">
+              <div class="calcbox">
+                <div class="h">1. Cálculo da Gravidade</div>
+                <div class="c">
+                  <p class="small">
+                    Iniciar com <b>Valor Básico Inicial</b> (1) e somar os itens aplicáveis.
+                    <br><b>Automático:</b> se escolher <b>Voo de Instrução</b>, marca “Voo de Instrução (+2)”.
+                    Se escolher <b>OVN</b>, marca “Voo OVN (+2)”.
+                  </p>
+                  <table class="gravlist">
+                    <thead>
+                      <tr>
+                        <th class="colV">Item</th>
+                        <th class="colP">Peso</th>
+                      </tr>
+                    </thead>
+                    <tbody id="gravList"></tbody>
+                    <tfoot>
+                      <tr>
+                        <td><b>Total Gravidade</b></td>
+                        <td class="center"><b id="gravTotal">1</b></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <div class="calcbox">
+                <div class="h">2. Cálculo do Risco</div>
+                <div class="c">
+                  <div class="calcrow">
+                    <div><b>PROBABILIDADE</b> (Máx / Mín)</div>
+                    <div class="val">Máx: <b id="probMax">0</b> | Mín: <b id="probMin">0</b></div>
+                  </div>
+
+                  <div class="calcrow">
+                    <div><b>GRAVIDADE</b></div>
+                    <div class="val"><b id="gravShow">1</b></div>
+                  </div>
+
+                  <div class="riskHighlight" aria-label="Risco máximo e mínimo">
+                    <div class="title">Risco (Destaque)</div>
+                    <div class="nums">
+                      <div class="boxn">Risco Mín<br><b id="riskMin">0</b></div>
+                      <div class="boxn">Risco Máx<br><b id="riskMax">0</b></div>
+                    </div>
+                  </div>
+
+                  <div style="margin-top:6px;">
+                    <b>3. Aplicação de ações de controle do risco</b>
+
+                    <table class="riskband">
+                      <thead>
+                        <tr>
+                          <th colspan="2" class="center">FAIXA DE RISCO</th>
+                          <th class="center">GRAU</th>
+                          <th>Possibilidade</th>
+                          <th class="center">Decisão</th>
+                        </tr>
+                        <tr>
+                          <th class="center">Voos da Parte III</th>
+                          <th class="center">Voos da Parte III + IV</th>
+                          <th class="center"></th>
+                          <th></th>
+                          <th class="center"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="center">0 – 44</td>
+                          <td class="center">0 – 49</td>
+                          <td class="center"><div class="chipWrap"><span class="chip low">Baixo</span></div></td>
+                          <td>Monitorar a variação do risco durante a missão</td>
+                          <td class="center">Cmt Missão Área / PO/PI</td>
+                        </tr>
+                        <tr>
+                          <td class="center">45 – 89</td>
+                          <td class="center">50 – 94</td>
+                          <td class="center"><div class="chipWrap"><span class="chip med">Médio</span></div></td>
+                          <td>Ajustar para a próxima missão e monitorar a variação do risco durante a missão</td>
+                          <td class="center">Cmt SU</td>
+                        </tr>
+                        <tr>
+                          <td class="center">90 – 119</td>
+                          <td class="center">95 – 124</td>
+                          <td class="center"><div class="chipWrap"><span class="chip high">Alto</span></div></td>
+                          <td>Ajustar antes da missão (*)</td>
+                          <td class="center">Cmt U.Ae</td>
+                        </tr>
+                        <tr>
+                          <td class="center">&gt; de 120</td>
+                          <td class="center">&gt; de 125</td>
+                          <td class="center"><div class="chipWrap"><span class="chip vhigh">Muito Alto</span></div></td>
+                          <td>Adiar e replanejar (*)</td>
+                          <td class="center">Cmt U.Ae</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="riskCards" id="riskCards">
+                      <div class="riskCard">
+                        <div class="row"><div class="k">Faixa (P III)</div><div>0 – 44</div></div>
+                        <div class="row"><div class="k">Faixa (P III + IV)</div><div>0 – 49</div></div>
+                        <div class="row"><div class="k">Grau</div><div class="chipWrap"><span class="chip low">Baixo</span></div></div>
+                        <div class="text">Monitorar a variação do risco durante a missão</div>
+                        <div class="decision">Decisão: Cmt Missão Área / PO/PI</div>
+                      </div>
+
+                      <div class="riskCard">
+                        <div class="row"><div class="k">Faixa (P III)</div><div>45 – 89</div></div>
+                        <div class="row"><div class="k">Faixa (P III + IV)</div><div>50 – 94</div></div>
+                        <div class="row"><div class="k">Grau</div><div class="chipWrap"><span class="chip med">Médio</span></div></div>
+                        <div class="text">Ajustar para a próxima missão e monitorar a variação do risco durante a missão</div>
+                        <div class="decision">Decisão: Cmt SU</div>
+                      </div>
+
+                      <div class="riskCard">
+                        <div class="row"><div class="k">Faixa (P III)</div><div>90 – 119</div></div>
+                        <div class="row"><div class="k">Faixa (P III + IV)</div><div>95 – 124</div></div>
+                        <div class="row"><div class="k">Grau</div><div class="chipWrap"><span class="chip high">Alto</span></div></div>
+                        <div class="text">Ajustar antes da missão (*)</div>
+                        <div class="decision">Decisão: Cmt U.Ae</div>
+                      </div>
+
+                      <div class="riskCard">
+                        <div class="row"><div class="k">Faixa (P III)</div><div>&gt; de 120</div></div>
+                        <div class="row"><div class="k">Faixa (P III + IV)</div><div>&gt; de 125</div></div>
+                        <div class="row"><div class="k">Grau</div><div class="chipWrap"><span class="chip vhigh">Muito Alto</span></div></div>
+                        <div class="text">Adiar e replanejar (*)</div>
+                        <div class="decision">Decisão: Cmt U.Ae</div>
+                      </div>
+                    </div>
+
+                    <p class="small" style="margin-top:6px;">
+                      (*) Caso o grau de risco não possa ser reajustado para valores abaixo de Alto, a decisão do prosseguimento da missão é exclusiva do Cmt OM.
+                    </p>
+
+                    <div class="calcrow" style="margin-top:8px;">
+                      <div><b>Grau sugerido (pelo Risco Máx)</b></div>
+                      <div class="val"><b id="gradeSugerido">—</b></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:10px;">
+              <b>4. Ações da tripulação para gerenciar os potenciais de risco presentes:</b>
+              <textarea placeholder="Descreva aqui as ações/medidas de mitigação..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottomActions">
+        <button id="btnPDF" class="btnPrimary" type="button">Salvar em PDF</button>
+        <button id="btnReset" type="button">Zerar tudo</button>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const PARTE_III = {
+  RH: [
+    { id:"p3_rh_1", text:"Um dos pilotos realizou pelo menos um voo em menos de 30 dias.", w:{S:0,N:2,D:2} },
+    { id:"p3_rh_2", text:"O 1P/PO possui MENOS de 50 HV no modelo na função de 1P.", w:{S:2,N:0,D:2} },
+    { id:"p3_rh_3", text:"O PA/PB possui MENOS de 50 HV no modelo na função de 2P.", w:{S:2,N:0,D:2} },
+    { id:"p3_rh_4", text:"OM/OV/MV possui MENOS de 50 HV no modelo na função de MV/OM/VL.", w:{S:2,N:0,D:2} },
+    { id:"p3_rh_5", text:"MVA/MVB possui MENOS de 50 HV no modelo na função de MVA/MVB.", w:{S:2,N:0,D:2} },
+    { id:"p3_rh_6", text:"A tripulação participou do CRM nos últimos 24 meses.", w:{S:0,N:2,D:2} },
+    { id:"p3_rh_7", text:"Briefing da missão realizado de forma completa e detalhada.", w:{S:0,N:2,D:2} },
+    { id:"p3_rh_8", text:"Houve briefing de segurança para todos os envolvidos na missão, SFC.", w:{S:0,N:3,D:3} },
+  ],
+  METEO: [
+    { id:"p3_me_1", text:"O local de pouso/decolagem foi reconhecido (locais não homologados).", w:{S:0,N:2,D:2} },
+    { id:"p3_me_2", text:"Existe aglomeração de pássaros na região de voo.", w:{S:2,N:0,D:2} },
+    { id:"p3_me_3", text:"As informações necessárias ao voo estão disponíveis (NOTAM, Meteorologia, etc).", w:{S:0,N:2,D:2} },
+    { id:"p3_me_4", text:"As publicações técnicas necessárias ao voo estão atualizadas e disponíveis.", w:{S:0,N:1,D:1} },
+    { id:"p3_me_5", text:"Existe previsão de tempo significativo em rota (CB, frente fria, instabilidade, etc).", w:{S:3,N:0,D:3} },
+    { id:"p3_me_6", text:"Infraestrutura necessária ao voo em condições de prestar apoio (pessoal + Eqp de Mnt, pessoal e material AIS, equipe e material de apoio ao solo).", w:{S:0,N:1,D:1} },
+  ],
+  MATERIAL: [
+    { id:"p3_ma_1", text:"A aeronave se encontra com MENOS de 10 HV após inspeção A/TC.", w:{S:3,N:0,D:3} },
+    { id:"p3_ma_2", text:"A aeronave RFD executar o voo pairado fora do efeito solo no local de pouso.", w:{S:0,N:3,D:3} },
+    { id:"p3_ma_3", text:"A aeronave já foi pré-voada.", w:{S:0,N:1,D:1} },
+  ],
+  MISSAO: [
+    { id:"p3_mi_1", text:"Adequado tempo para planejamento e preparação.", w:{S:0,N:2,D:2} },
+    { id:"p3_mi_2", text:"Voo com duração superior a 3 (três) HV contínuas* (Obs 1).", w:{S:1,N:0,D:1} },
+    { id:"p3_mi_3", text:"Operações com duração superior a 5 dias.", w:{S:1,N:0,D:1} },
+    { id:"p3_mi_4", text:"Mais de 05 repetições da mesma manobra.", w:{S:2,N:0,D:2} },
+    { id:"p3_mi_5", text:"Voo com autoridade de bordo.", w:{S:3,N:0,D:3} },
+    { id:"p3_mi_6", text:"Há tempo suficiente para o cumprimento da missão, mesmo havendo imprevistos.", w:{S:0,N:2,D:2} },
+    { id:"p3_mi_7", text:"O MV estará embarcado no voo.", w:{S:0,N:2,D:2} },
+  ],
+  ORG: [
+    { id:"p3_or_1", text:"Existem pressões externas para execução dessa missão.", w:{S:3,N:0,D:3} },
+    { id:"p3_or_2", text:"A tripulação participou da padronização de manobras e procedimentos da U.A.", w:{S:0,N:2,D:2} },
+    { id:"p3_or_3", text:"A tripulação participa regularmente das reuniões de Seg Voo da OM.", w:{S:0,N:1,D:1} },
+    { id:"p3_or_4", text:"A tripulação e/ou Fração de Helicópteros é toda da mesma U.A.", w:{S:0,N:2,D:2} },
+  ],
+};
+
+const PARTE_IV = {
+  INSTRUCAO: [
+    { id:"p4_in_1", text:"Haverá hot-seat.", w:{S:1,N:0,D:1} },
+    { id:"p4_in_2", text:"O voo será realizado com piloto aluno e/ou com piloto em formação IFR ou OVN.", w:{S:2,N:0,D:2} },
+    { id:"p4_in_3", text:"É voo de emergência, IFR ou OVN.", w:{S:2,N:0,D:2} },
+    { id:"p4_in_4", text:"É o primeiro voo de Habilitação Técnica de algum tripulante no modelo de aeronave.", w:{S:2,N:0,D:2} },
+  ],
+  IFR: [
+    { id:"p4_if_1", text:"O voo será ACIMA de 10.000 ft (hipóxia).", w:{S:1,N:0,D:1} },
+    { id:"p4_if_2", text:"O nivelamento manter-se-á acima dos obstáculos previstos na rota.", w:{S:0,N:3,D:3} },
+    { id:"p4_if_3", text:"O Briefing meteorológico foi realizado por especialista.", w:{S:0,N:1,D:1} },
+    { id:"p4_if_4", text:"Um dos pilotos realizou voo IFR em um período inferior a 30 dias.", w:{S:0,N:2,D:2} },
+    { id:"p4_if_5", text:"ADEP foi realizada a partir de um aeródromo homologado EPC.", w:{S:0,N:2,D:2} },
+  ],
+  OVN: [
+    { id:"p4_ov_1", text:"Será realizado voo na noite de nível 4 ou 5.", w:{S:2,N:0,D:2} },
+    { id:"p4_ov_2", text:"Será realizado voo em área urbana.", w:{S:2,N:0,D:2} },
+    { id:"p4_ov_3", text:"Foi realizado reconhecimento fora das áreas de instrução da Av Ex.", w:{S:0,N:3,D:3} },
+    { id:"p4_ov_4", text:"Dispositivo de iluminação individual compatível com o voo OVN.", w:{S:0,N:1,D:1} },
+    { id:"p4_ov_5", text:"Presença de neblina e/ou precipitação.", w:{S:2,N:0,D:2} },
+    { id:"p4_ov_6", text:"Mais de 30 dias sem voar OVN.", w:{S:2,N:0,D:2} },
+  ],
+  TECNICO: [
+    { id:"p4_te_1", text:"É o primeiro giro e/ou voo após inspeção.", w:{S:2,N:0,D:2} },
+    { id:"p4_te_2", text:"É o primeiro voo após troca de componentes vitais (CTP, Motor, Superfícies de Comando e FCU).", w:{S:3,N:0,D:3} },
+    { id:"p4_te_3", text:"A aeronave está abastecida com a autonomia mínima de 40 minutos.", w:{S:0,N:2,D:2} },
+    { id:"p4_te_4", text:"Foi verificada e fechada todas as OS afetas às intervenções já ocorridas na Av.", w:{S:0,N:2,D:2} },
+    { id:"p4_te_5", text:"Houve quebra na sequência de realização dos serviços de manutenção.", w:{S:2,N:0,D:2} },
+    { id:"p4_te_6", text:"Houve troca de equipe de manutenção ou inspetor durante a sequência do voo de produção.", w:{S:1,N:0,D:1} },
+    { id:"p4_te_7", text:"Elevado número de partidas (acima 03) para sanar a mesma pane.", w:{S:1,N:0,D:1} },
+    { id:"p4_te_8", text:"Foi realizado o pré-voo minucioso, com atenção nas áreas que sofreram manutenção.", w:{S:0,N:1,D:1} },
+    { id:"p4_te_9", text:"O voo faz parte da missão de check de NG máximo ou batente de NG.", w:{S:2,N:0,D:2} },
+    { id:"p4_te_10", text:"Pelo menos um dos pilotos realiza voos de manutenção com regularidade.", w:{S:0,N:1,D:1} },
+    { id:"p4_te_11", text:"Mecânicos de manutenção com experiência na missão a ser executada.", w:{S:0,N:2,D:2} },
+    { id:"p4_te_12", text:"Voo está sendo realizado em local que permita pouso seguro a qualquer momento.", w:{S:0,N:2,D:2} },
+  ]
+};
+
+const GRAVIDADE = [
+  { id:"g0", text:"Valor Básico Inicial", pts: 1, fixed:true },
+  { id:"g1", text:"Voo Tático", pts: 2 },
+  { id:"g2", text:"Voo de Instrução", pts: 2, autoByTipo:"INSTRUCAO" },
+  { id:"g3", text:"Voo de Instrução simultâneo", pts: 1 },
+  { id:"g4", text:"Voo OVN", pts: 2, autoByTipo:"OVN" },
+  { id:"g5", text:"Voo de demonstração", pts: 3 },
+  { id:"g6", text:"Voo de formação", pts: 2 },
+  { id:"g7", text:"Voo Solo", pts: 1 },
+  { id:"g8", text:"Ambiente hostil real", pts: 3 },
+  { id:"g9", text:"Voo Técnico (Mnt)", pts: 1 }
+];
+
+function esc(s){ return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+function rowHTML(item, groupName){
+  return `
+    <tr class="question-row">
+      <td class="w-item">${esc(item.text)}</td>
+      <td class="optcell w-s">
+        <label class="r tagS">
+          <input type="radio" name="${groupName}_${item.id}" value="S">
+          <span class="val">${item.w.S}</span>
+        </label>
+      </td>
+      <td class="optcell w-n">
+        <label class="r tagN">
+          <input type="radio" name="${groupName}_${item.id}" value="N">
+          <span class="val">${item.w.N}</span>
+        </label>
+      </td>
+      <td class="optcell w-d">
+        <label class="r tagD" title="Desconhecido">
+          <input type="radio" name="${groupName}_${item.id}" value="D">
+          <span class="val">${item.w.D}</span>
+        </label>
+      </td>
+    </tr>
+  `;
+}
+
+function renderParteIII(){
+  document.getElementById("p3_rh").innerHTML = PARTE_III.RH.map(it=>rowHTML(it,"P3")).join("");
+  document.getElementById("p3_me").innerHTML = PARTE_III.METEO.map(it=>rowHTML(it,"P3")).join("");
+  document.getElementById("p3_ma").innerHTML = PARTE_III.MATERIAL.map(it=>rowHTML(it,"P3")).join("");
+  document.getElementById("p3_mi").innerHTML = PARTE_III.MISSAO.map(it=>rowHTML(it,"P3")).join("");
+  document.getElementById("p3_or").innerHTML = PARTE_III.ORG.map(it=>rowHTML(it,"P3")).join("");
+}
+
+function renderParteIV(){
+  document.getElementById("p4_in").innerHTML = PARTE_IV.INSTRUCAO.map(it=>rowHTML(it,"P4")).join("");
+  document.getElementById("p4_if").innerHTML = PARTE_IV.IFR.map(it=>rowHTML(it,"P4")).join("");
+  document.getElementById("p4_ov").innerHTML = PARTE_IV.OVN.map(it=>rowHTML(it,"P4")).join("");
+  document.getElementById("p4_te").innerHTML = PARTE_IV.TECNICO.map(it=>rowHTML(it,"P4")).join("");
+}
+
+function renderGravidade(){
+  const tb = document.getElementById("gravList");
+  tb.innerHTML = GRAVIDADE.map(g=>{
+    if(g.fixed){
+      return `
+        <tr>
+          <td>${esc(g.text)}</td>
+          <td class="center"><b>${g.pts}</b></td>
+        </tr>
+      `;
+    }
+    return `
+      <tr>
+        <td>
+          <label class="r" style="justify-content:flex-start; align-items:flex-start; flex-direction:row; gap:10px;">
+            <input type="checkbox" id="${g.id}" data-pts="${g.pts}">
+            <span>${esc(g.text)}</span>
+          </label>
+        </td>
+        <td class="center"><b>+${g.pts}</b></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function setHeaderDateToday(){
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,"0");
+  const dd = String(today.getDate()).padStart(2,"0");
+  const iso = `${yyyy}-${mm}-${dd}`;
+  const el = document.getElementById("hdrData");
+  if(el && !el.value) el.value = iso;
+}
+
+function setStamp(){
+  document.getElementById("stamp").textContent = new Date().toLocaleString("pt-BR");
+}
+
+function getPickedValue(name, mapW){
+  const picked = document.querySelector(`input[name="${name}"]:checked`);
+  if(!picked) return {minAdd:0, maxAdd:0};
+  const v = picked.value;
+  if(v === "S") return {minAdd: mapW.S, maxAdd: mapW.S};
+  if(v === "N") return {minAdd: mapW.N, maxAdd: mapW.N};
+  if(v === "D") return {minAdd: 0,      maxAdd: mapW.D};
+  return {minAdd:0, maxAdd:0};
+}
+
+function sumSection(items, groupPrefix){
+  let min = 0, max = 0;
+  items.forEach(it=>{
+    const name = `${groupPrefix}_${it.id}`;
+    const got = getPickedValue(name, it.w);
+    min += got.minAdd;
+    max += got.maxAdd;
+  });
+  return {min, max};
+}
+
+function applyTipoVooVisibility(){
+  const t = document.getElementById("tipoVoo").value;
+  const show = (id, on)=> document.getElementById(id).style.display = on ? "" : "none";
+  show("secInstrucao", t==="INSTRUCAO");
+  show("secIFR",       t==="IFR");
+  show("secOVN",       t==="OVN");
+  show("secTecnico",   t==="TECNICO");
+}
+
+function autoMarkGravidadeByTipo(){
+  const t = document.getElementById("tipoVoo").value;
+  GRAVIDADE.forEach(g=>{
+    if(g.fixed) return;
+    if(!g.autoByTipo) return;
+    const cb = document.getElementById(g.id);
+    if(!cb) return;
+    cb.checked = (t === g.autoByTipo);
+  });
+}
+
+function sumParteIII(){
+  const rh = sumSection(PARTE_III.RH,       "P3");
+  const me = sumSection(PARTE_III.METEO,    "P3");
+  const ma = sumSection(PARTE_III.MATERIAL, "P3");
+  const mi = sumSection(PARTE_III.MISSAO,   "P3");
+  const or = sumSection(PARTE_III.ORG,      "P3");
+
+  document.getElementById("p3_rh_min").textContent = rh.min;
+  document.getElementById("p3_rh_max").textContent = rh.max;
+  document.getElementById("p3_me_min").textContent = me.min;
+  document.getElementById("p3_me_max").textContent = me.max;
+  document.getElementById("p3_ma_min").textContent = ma.min;
+  document.getElementById("p3_ma_max").textContent = ma.max;
+  document.getElementById("p3_mi_min").textContent = mi.min;
+  document.getElementById("p3_mi_max").textContent = mi.max;
+  document.getElementById("p3_or_min").textContent = or.min;
+  document.getElementById("p3_or_max").textContent = or.max;
+
+  document.getElementById("p3_rh_min2").textContent = rh.min;
+  document.getElementById("p3_rh_max2").textContent = rh.max;
+  document.getElementById("p3_me_min2").textContent = me.min;
+  document.getElementById("p3_me_max2").textContent = me.max;
+  document.getElementById("p3_ma_min2").textContent = ma.min;
+  document.getElementById("p3_ma_max2").textContent = ma.max;
+  document.getElementById("p3_mi_min2").textContent = mi.min;
+  document.getElementById("p3_mi_max2").textContent = mi.max;
+  document.getElementById("p3_or_min2").textContent = or.min;
+  document.getElementById("p3_or_max2").textContent = or.max;
+
+  const p3min = rh.min + me.min + ma.min + mi.min + or.min;
+  const p3max = rh.max + me.max + ma.max + mi.max + or.max;
+
+  document.getElementById("p3min").textContent = p3min;
+  document.getElementById("p3max").textContent = p3max;
+
+  return {min:p3min, max:p3max};
+}
+
+function sumParteIV(){
+  const t = document.getElementById("tipoVoo").value;
+
+  const inS = sumSection(PARTE_IV.INSTRUCAO, "P4");
+  const ifS = sumSection(PARTE_IV.IFR,       "P4");
+  const ovS = sumSection(PARTE_IV.OVN,       "P4");
+  const teS = sumSection(PARTE_IV.TECNICO,   "P4");
+
+  document.getElementById("p4_in_min").textContent = inS.min;
+  document.getElementById("p4_in_max").textContent = inS.max;
+  document.getElementById("p4_if_min").textContent = ifS.min;
+  document.getElementById("p4_if_max").textContent = ifS.max;
+  document.getElementById("p4_ov_min").textContent = ovS.min;
+  document.getElementById("p4_ov_max").textContent = ovS.max;
+  document.getElementById("p4_te_min").textContent = teS.min;
+  document.getElementById("p4_te_max").textContent = teS.max;
+
+  document.getElementById("p4_in_min2").textContent = inS.min;
+  document.getElementById("p4_in_max2").textContent = inS.max;
+  document.getElementById("p4_if_min2").textContent = ifS.min;
+  document.getElementById("p4_if_max2").textContent = ifS.max;
+  document.getElementById("p4_ov_min2").textContent = ovS.min;
+  document.getElementById("p4_ov_max2").textContent = ovS.max;
+  document.getElementById("p4_te_min2").textContent = teS.min;
+  document.getElementById("p4_te_max2").textContent = teS.max;
+
+  let chosen = {min:0, max:0};
+  if(t==="INSTRUCAO") chosen = inS;
+  if(t==="IFR")       chosen = ifS;
+  if(t==="OVN")       chosen = ovS;
+  if(t==="TECNICO")   chosen = teS;
+  if(t==="REGULAR")   chosen = {min:0, max:0};
+
+  document.getElementById("p4min").textContent = chosen.min;
+  document.getElementById("p4max").textContent = chosen.max;
+
+  return chosen;
+}
+
+function sumGravidade(){
+  let total = 1;
+  GRAVIDADE.forEach(g=>{
+    if(g.fixed) return;
+    const cb = document.getElementById(g.id);
+    if(cb && cb.checked) total += g.pts;
+  });
+  document.getElementById("gravTotal").textContent = total;
+  document.getElementById("gravShow").textContent = total;
+  return total;
+}
+
+function classifyRisk(r){
+  if(r <= 49)  return {label:"Baixo"};
+  if(r <= 94)  return {label:"Médio"};
+  if(r <= 124) return {label:"Alto"};
+  return {label:"Muito Alto"};
+}
+
+function updateSelectedRows(){
+  document.querySelectorAll('.question-row').forEach(row=>{
+    const checked = row.querySelector('input[type="radio"]:checked');
+    row.classList.toggle('is-answered', !!checked);
+  });
+}
+
+function computeAll(){
+  applyTipoVooVisibility();
+  autoMarkGravidadeByTipo();
+
+  const p3 = sumParteIII();
+  const p4 = sumParteIV();
+
+  const tgMin = p3.min + p4.min;
+  const tgMax = p3.max + p4.max;
+
+  document.getElementById("tgMin").textContent = tgMin;
+  document.getElementById("tgMax").textContent = tgMax;
+
+  document.getElementById("probMin").textContent = tgMin;
+  document.getElementById("probMax").textContent = tgMax;
+
+  const grav = sumGravidade();
+
+  const riskMin = tgMin * grav;
+  const riskMax = tgMax * grav;
+
+  document.getElementById("riskMin").textContent = riskMin;
+  document.getElementById("riskMax").textContent = riskMax;
+
+  const g = classifyRisk(riskMax);
+  document.getElementById("gradeSugerido").textContent = `${g.label} (Risco Máx = ${riskMax})`;
+
+  updateSelectedRows();
+  setStamp();
+}
+
+function attachListeners(){
+  document.querySelectorAll('input[type="radio"]').forEach(el=>{
+    el.addEventListener('pointerdown', ()=>{
+      el.dataset.wasChecked = el.checked ? '1' : '0';
+    });
+    el.addEventListener('click', (ev)=>{
+      if(el.dataset.wasChecked === '1'){
+        ev.preventDefault();
+        el.checked = false;
+        computeAll();
+      }
+      el.dataset.wasChecked = '0';
+    });
+    el.addEventListener("change", computeAll);
+  });
+  document.querySelectorAll('input[type="checkbox"]').forEach(el=>{
+    el.addEventListener("change", computeAll);
+  });
+  document.getElementById("tipoVoo").addEventListener("change", computeAll);
+
+  // cabeçalho: mudanças só atualizam stamp
+  ["hdrMissao","hdrLocal","hdrData","hdrPreenchidoPor","hdrTrigrama"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("change", setStamp);
+    if(el) el.addEventListener("input", setStamp);
+  });
+  document.querySelectorAll('input[name="hdrFuncao"]').forEach(el=>{
+    el.addEventListener("change", setStamp);
+  });
+
+  document.getElementById("btnReset").addEventListener("click", ()=>{
+    document.querySelectorAll('input[type="radio"]').forEach(r=> r.checked = false);
+    document.querySelectorAll('input[type="checkbox"]').forEach(c=> c.checked = false);
+    document.getElementById("tipoVoo").value = "REGULAR";
+
+    // limpa cabeçalho (mas repõe a data de hoje)
+    ["hdrMissao","hdrLocal","hdrPreenchidoPor","hdrTrigrama"].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.value = "";
+    });
+    document.querySelectorAll('input[name="hdrFuncao"]').forEach(r=> r.checked = false);
+
+    const d = document.getElementById("hdrData"); if(d) d.value = "";
+    setHeaderDateToday();
+
+    computeAll();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+
+  document.getElementById("btnPDF").addEventListener("click", ()=>{
+    window.print();
+  });
+}
+
+/* INIT */
+renderParteIII();
+renderParteIV();
+renderGravidade();
+setHeaderDateToday();
+setStamp();
+attachListeners();
+computeAll();
+</script>
+</body>
+</html>
